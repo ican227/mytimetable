@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>セミナー時間割</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F6F8;--surface:#FFFFFF;--ink:#16202E;--sub:#5B6676;--line:#DDE2E9;
+  --accent:#FFC93C;--accent-ink:#3A2B00;--warn:#C2410C;--warn-bg:#FDEBDD;
+  --r0:#2F6FDE;--r1:#1F9D6B;--r2:#E0603A;--r3:#8A4FD6;--r4:#B7791F;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F141B;--surface:#19212C;--ink:#EAEFF5;--sub:#9AA6B5;--line:#2A3442;
+    --warn:#FDA172;--warn-bg:#3A2418;
+    --r0:#6C9BFF;--r1:#4CC795;--r2:#FF8A66;--r3:#B58CFF;--r4:#E8B04A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F141B;--surface:#19212C;--ink:#EAEFF5;--sub:#9AA6B5;--line:#2A3442;
+  --warn:#FDA172;--warn-bg:#3A2418;
+  --r0:#6C9BFF;--r1:#4CC795;--r2:#FF8A66;--r3:#B58CFF;--r4:#E8B04A;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;line-height:1.6;padding-bottom:84px}
+main{max-width:640px;margin:0 auto;padding:20px 16px}
+h1{font-size:26px;font-weight:900;margin:0 0 4px;letter-spacing:.02em}
+.sub{color:var(--sub);font-size:14px;margin:0 0 16px}
+.days{display:flex;gap:8px;margin-bottom:18px}
+.day{flex:1;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:10px 6px;font:inherit;cursor:pointer;text-align:center}
+.day b{display:block;font-size:20px;font-weight:900;line-height:1.2}
+.day span{font-size:12px;color:var(--sub)}
+.day[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+.day[aria-pressed="true"] span{color:var(--bg);opacity:.75}
+.slot{margin-bottom:20px}
+.slot h2{font-size:15px;font-weight:700;margin:0 0 8px;color:var(--sub)}
+.card{display:flex;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:8px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--rc)}
+.card .body{flex:1;min-width:0;padding-left:4px}
+.card h3{font-size:16px;font-weight:700;margin:0 0 4px;line-height:1.45}
+.meta{font-size:13px;color:var(--sub)}
+.room{display:inline-block;font-size:12px;font-weight:700;color:var(--rc);margin-right:8px}
+.onl{display:inline-block;font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--sub)}
+.fav{align-self:flex-start;flex:none;border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.fav[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.fav:focus-visible,.day:focus-visible,.tab:focus-visible{outline:3px solid var(--r0);outline-offset:2px}
+.summary{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:18px;font-size:15px}
+.summary b{font-size:22px;font-weight:900}
+.warn{color:var(--warn);font-weight:700;margin-top:6px;font-size:14px}
+.tl{position:relative;padding-left:0}
+.row{display:flex;gap:8px;margin-bottom:0}
+.time{width:46px;flex:none;text-align:right;font-size:14px;font-weight:700;padding-top:14px;font-variant-numeric:tabular-nums}
+.time small{display:block;font-size:12px;font-weight:400;color:var(--sub)}
+.rail{width:14px;flex:none;position:relative}
+.rail::before{content:"";position:absolute;left:6px;top:0;bottom:0;width:2px;background:var(--line)}
+.rail i{position:absolute;left:0;top:19px;width:14px;height:14px;border-radius:50%;background:var(--rc,var(--sub));border:3px solid var(--bg)}
+.rail.brk i{background:var(--line)}
+.row .card,.row .brk-card{flex:1;min-width:0;margin-bottom:12px}
+.brk-card{padding:14px 4px;color:var(--sub);font-size:14px}
+.row .card{flex-direction:column;gap:8px}
+.row .card .fav{align-self:flex-start}
+.par{display:flex;gap:8px;flex:1;min-width:0;margin-bottom:12px;overflow-x:auto}
+.par .card{flex:1 0 126px;min-width:126px;margin-bottom:0;padding:12px 12px 12px 14px}
+.par .card h3{font-size:14px}
+.par .card .fav{align-self:stretch;text-align:center;white-space:normal;font-size:12px;padding:6px 8px}
+.empty{background:var(--surface);border:1.5px dashed var(--line);border-radius:14px;padding:28px 18px;text-align:center;color:var(--sub)}
+.empty button{margin-top:12px;border:0;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:700;border-radius:999px;padding:10px 20px;cursor:pointer}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));gap:8px;z-index:5}
+.tab{flex:1;border:0;background:transparent;color:var(--sub);font:inherit;font-size:15px;font-weight:700;padding:10px;border-radius:12px;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.badge{display:inline-block;min-width:22px;background:var(--accent);color:var(--accent-ink);border-radius:999px;font-size:12px;padding:0 6px;margin-left:6px}
+@media (prefers-reduced-motion:no-preference){.card{transition:border-color .15s}}
+</style>
+</head>
+<body>
+<main>
+  <h1>セミナー時間割</h1>
+  <p class="sub" id="sub"></p>
+  <div class="days" id="days"></div>
+  <div id="view"></div>
+</main>
+<nav>
+  <button class="tab" id="tab-all" aria-pressed="true">講座一覧</button>
+  <button class="tab" id="tab-my" aria-pressed="false">マイ時間割<span class="badge" id="cnt">0</span></button>
+</nav>
+<script>
+var DAYS=[{d:"11月21日",w:"土",s:"11/21"},{d:"11月22日",w:"日",s:"11/22"},{d:"11月23日",w:"月",s:"11/23"}];
+var ROOMS={"1階 井深ホール":"var(--r0)","3階 第1会議室":"var(--r1)","3階 第2会議室":"var(--r2)","3階 第3会議室":"var(--r3)","共同研究室7":"var(--r4)"};
+var H="1階 井深ホール",R1="3階 第1会議室",R2="3階 第2会議室",R3="3階 第3会議室",K="共同研究室7";
+var S=[
+ {id:1,day:0,start:"11:10",end:"12:30",room:H,online:true,title:"司法取材・報道どこまでOK？裁判公開の原理原則や意義を知ろう",who:["清永聡（NHK）","江川紹子（ジャーナリスト、神奈川大学国際日本学部特任教授）","井桁大介（認定NPO法人CALL4）","ローレンス・レペタ（米国弁護士）"]},
+ {id:2,day:0,start:"11:10",end:"12:30",room:R1,online:true,title:"沖縄知事選で何が起き、何ができたか―ファクトチェックを中心に",who:["阿部岳（沖縄タイムス）","南彰（琉球新報）"]},
+ {id:3,day:0,start:"11:10",end:"12:30",room:R3,online:true,title:"「オールドメディア」がZ世代に響くには　朝日×読売パネル討論",who:["石松恒（朝日新聞）","鳥羽渉（読売新聞東京本社）"]},
+ {id:4,day:0,start:"13:30",end:"14:50",room:H,online:true,title:"しっかり報じるためのメディア法　報道を支える弁護士が語ります",who:["喜田村洋一（ミネルバ法律事務所）"]},
+ {id:5,day:0,start:"13:30",end:"14:50",room:R1,online:true,title:"「サナエトークン」「誹謗中傷動画」の裏舞台にどう肉薄したのか",who:["河野嘉誠（フリーランス）"]},
+ {id:6,day:0,start:"13:30",end:"14:50",room:R2,online:true,title:"歴史公文書で戦争遺跡を発掘！　日韓共同取材の可能性を探る",who:["池鐘益（KBS（韓国放送））","福岡静哉（毎日新聞）"]},
+ {id:7,day:0,start:"13:30",end:"14:50",room:R3,online:true,title:"AI時代だからこそ必須！不動産と登記の基本を学ぶ",who:["本間純（日経BP）"]},
+ {id:8,day:0,start:"15:10",end:"16:30",room:H,online:true,title:"AIをどう使いこなす？　報道現場に生かすための活用術",who:["伊地知将史（日本経済新聞）"]},
+ {id:9,day:0,start:"15:10",end:"16:30",room:R1,online:false,title:"高齢者を連れ去る「公権力の闇」　被害者とスクープの裏側を語る",who:["西岡千史（フロントラインプレス）"]},
+ {id:10,day:0,start:"15:10",end:"16:30",room:R2,online:true,title:"揺らぐ「公益通報」の実態とは　冤罪を追った記者の次なる狙い",who:["遠藤浩二（毎日新聞）"]},
+ {id:11,day:0,start:"15:10",end:"16:30",room:R3,online:true,title:"データから考える「メディア不信」との向き合い方",who:["米重克洋（JX通信社）","日下部聡（毎日新聞）"]},
+ {id:12,day:0,start:"16:50",end:"18:10",room:H,online:true,title:"報道はSNS空間のワクチンになれるか　メガソーラー開発を例に",who:["髙橋史弥（Japan Nexus Intelligence）","井田徹治（共同通信編集委員兼論説委員、ニュースルーム PLANET-ing編集委員会共同代表）","八田浩輔（毎日新聞）"]},
+ {id:13,day:0,start:"16:50",end:"18:10",room:R1,online:true,title:"活字記者による「映像ドキュメンタリー」　長編映画と潜入の裏側",who:["大場弘行（毎日新聞）","西村利也（産経新聞）"]},
+ {id:14,day:0,start:"16:50",end:"18:10",room:R2,online:true,title:"海外オンラインカジノの本丸に「潜入取材」どう実現したのか",who:["碓井南（NHK大阪放送局）"]},
+ {id:15,day:0,start:"16:50",end:"18:10",room:K,online:true,title:"記者・デスクのための法的支援団体を弁護士と語ろう",who:["廣田智子（麻布十番法律事務所）","池田雅子（桑原・池田法律事務所）","杉山日那子（カリフォルニア大学アーバイン校ロースクール）"]},
+ {id:16,day:1,start:"09:30",end:"10:50",room:H,online:true,title:"これがスクールジャーナリズムの実力だ　全国高校新聞実践発表会",who:["滋賀県立虎姫高校","埼玉県立松山高校","青山学院横浜英和高校","静岡市立清水桜が丘高校","尾高泉（教育とメディアのコモンズ・ラボ代表、日本NIE学会常任理事）"]},
+ {id:17,day:1,start:"09:30",end:"10:50",room:R1,online:true,title:"【ハンズオン講座】データ報道のための「エクセル」活用術",who:["西山諒（産経新聞）"]},
+ {id:18,day:1,start:"09:30",end:"10:50",room:R2,online:false,title:"「フェイクとリアル　川口 クルド人 真相」取材の舞台裏",who:["小黒洋平（NHK）","青山浩平（NHK）"]},
+ {id:19,day:1,start:"09:30",end:"10:50",room:K,online:true,title:"組織の枠超え報道に向き合う　各地の研究会ネットワークを広めよう",who:["西口正史（ラジオ関西ビジネスソリューション局、放送法研究会）","角雄記（中日新聞）","福本晋悟（MBS）"]},
+ {id:20,day:1,start:"11:10",end:"12:30",room:H,online:true,title:"全国高校スクールジャーナリストサミット2026",who:["滋賀県立虎姫高校","埼玉県立松山高校","青山学院横浜英和高校","静岡市立清水桜が丘高校","川畑悠成（筑波大学新聞編集部）","澤康臣（早稲田大学）"]},
+ {id:21,day:1,start:"11:10",end:"12:30",room:R1,online:true,title:"社員2人の独立メディアがなぜこれほどスクープを連発できるのか",who:["瀬尾傑（スローニュース）","熊田安伸（スローニュース）"]},
+ {id:22,day:1,start:"11:10",end:"12:30",room:R2,online:true,title:"いわき信用組合の不正融資事件　異例の金融不祥事をどう暴いたか",who:["沢伸也（朝日新聞）"]},
+ {id:23,day:1,start:"11:10",end:"12:30",room:R3,online:true,title:"8年前の端緒をスクープに　羽田空港ビル利益供与問題",who:["糸井裕哉（読売新聞東京本社）"]},
+ {id:24,day:1,start:"13:30",end:"14:50",room:H,online:true,title:"闇アプリの解析で暴いた「トクリュウ」の取材の内幕",who:["知野雄介（フジテレビ）","松岡紳顕（フジテレビ）"]},
+ {id:25,day:1,start:"13:30",end:"14:50",room:R1,online:true,title:"戦没者名簿の分析にAIを活用　紙資料のデータ可視化に挑む",who:["斉藤直哉（NHK秋田放送局）","金澤皓介（西日本新聞）","坂本信博（西日本新聞）"]},
+ {id:26,day:1,start:"13:30",end:"14:50",room:R2,online:true,title:"京大「JIP論文」不正矮小化疑惑をどう解明したのか",who:["須田桃子（フリーランス）"]},
+ {id:27,day:1,start:"13:30",end:"14:50",room:R3,online:true,title:"公益通報者保護法を取材に活用、12/1改正で新たな選択肢",who:["奥山俊宏（上智大学）"]},
+ {id:28,day:1,start:"13:30",end:"14:50",room:K,online:true,title:"記者採用の危機！？人事担当者の本音トーク",who:["朝来野祥子（読売新聞東京本社）","根津朝彦（立命館大学）"]},
+ {id:29,day:1,start:"15:10",end:"16:30",room:H,online:true,title:"OSINTで暴いたフェンタニル拠点　公開情報で国際犯罪に迫る",who:["阿部哲也（日本経済新聞）","朝田賢治（日本経済新聞）"]},
+ {id:30,day:1,start:"15:10",end:"16:30",room:R1,online:true,title:"地方紙の連携が暴いた旧陸軍による「人体実験」取材の舞台裏",who:["岡本晃明（京都新聞）","高宗亮輔（熊本日日新聞）"]},
+ {id:31,day:1,start:"15:10",end:"16:30",room:R3,online:true,title:"SNS選挙の「熱狂」に迫った取材の裏側",who:["安藤文暁（神戸新聞）"]},
+ {id:32,day:1,start:"15:10",end:"16:30",room:K,online:true,title:"海外留学ヘルプデスク～挑戦を阻む4つの壁をどう乗り越えるか～",who:["山下美波（中国新聞）","宮崎稔樹（Bloomberg）","今村未生（共同通信）"]},
+ {id:33,day:1,start:"16:50",end:"18:10",room:H,online:true,title:"調査報道大賞2026授賞式",who:[]},
+ {id:34,day:2,start:"09:30",end:"10:50",room:H,online:true,title:"陸自現地情報隊が極秘裏に行っていた思想信条調査をどう暴いたのか",who:["植木泰士（熊本日日新聞）"]},
+ {id:35,day:2,start:"09:30",end:"10:50",room:R1,online:true,title:"回る「ニューストーク動画」の作り方～ターゲットにどう刺すか～",who:["村井弦（文藝春秋）","溝上由夏（テレビ朝日）"]},
+ {id:36,day:2,start:"09:30",end:"10:50",room:R2,online:true,title:"一歩先行く情報公開制度活用法",who:["三木由希子（NPO法人情報公開クリアリングハウス理事長、専修大学教授）"]},
+ {id:37,day:2,start:"11:10",end:"12:30",room:H,online:true,title:"恒例！取材が楽になるオープンデータ活用術、いよいよ最終回！？",who:["熊田安伸（スローニュース）"]},
+ {id:38,day:2,start:"11:10",end:"12:30",room:R1,online:true,title:"トラウマの知識があなたの報道を深める ～取材相手も自分も傷つけない関係を育むために",who:["河原理子（トラウマ取材を学ぶ日本のジャーナリストの会）","加藤美喜（中日新聞）"]},
+ {id:39,day:2,start:"11:10",end:"12:30",room:R3,online:true,title:"犯罪組織「プリンス・グループ」日本進出の実態を調査報道",who:["武田惇志（共同通信）","北藤稔道（共同通信）"]},
+ {id:40,day:2,start:"11:10",end:"12:30",room:K,online:false,title:"深まるギャップ、埋めるにはどうしたら？（U35推奨）",who:["奈良美里（朝日新聞）","外山薫（テレビ朝日）"]},
+ {id:41,day:2,start:"13:30",end:"14:50",room:H,online:true,title:"再演　初心記者「基本のキ」だけど本質的かもしれない話",who:["奥山俊宏（上智大学）","澤康臣（早稲田大学）"]},
+ {id:42,day:2,start:"13:30",end:"14:50",room:R1,online:true,title:"メディアvs専門家　サイバー取材で何ができる、どこまでやれる？",who:["佐藤健（トレンドマイクロ株式会社）","飯村将ひこ（株式会社ラック）","須藤龍也（日本経済新聞）","福田陽平（TBSテレビ）"]},
+ {id:43,day:2,start:"13:30",end:"14:50",room:R3,online:false,title:"過去最大の被害懸念も…「みんなで大家さん」の内幕をどう取材？",who:["本間純（日経BP）"]},
+ {id:44,day:2,start:"13:30",end:"14:50",room:K,online:true,title:"どうする？メディア×女性のキャリア もやもや＆海外事例を共有",who:["岡林佐和（朝日新聞）","溝上由夏（テレビ朝日）"]},
+ {id:45,day:2,start:"15:10",end:"16:30",room:H,online:true,title:"再演　続・初心記者「基本のキ」だけど本質的かもしれない話",who:["奥山俊宏（上智大学）","澤康臣（早稲田大学）"]},
+ {id:46,day:2,start:"15:10",end:"16:30",room:R1,online:true,title:"「性暴力」を伝える全く新しい試み、なぜ始め、どこへ向かうのか",who:["池田鮎美（プラットフォーム「プラネチカ 性暴力を考えつづける」）","宮本聖二（プラットフォーム「プラネチカ 性暴力を考えつづける」編集長、立教大学大学院客員教授）"]},
+ {id:47,day:2,start:"15:10",end:"16:30",room:R2,online:true,title:"文春スクープにない視点で「事件の真の協力者」をどう取材したか",who:["海野律人（NHK経済部）"]},
+ {id:48,day:2,start:"16:50",end:"18:10",room:H,online:true,title:"米政権監視でメディアが連帯 言論の自由死守で団結",who:["津山恵子（ニューヨーク在住ジャーナリスト）"]}
+];
+var BR=[
+ {day:0,start:"12:30",end:"13:30",title:"昼休憩"},
+ {day:0,start:"14:50",end:"15:10",title:"休憩"},
+ {day:0,start:"16:30",end:"16:50",title:"休憩"},
+ {day:1,start:"10:50",end:"11:10",title:"休憩"},
+ {day:1,start:"12:30",end:"13:30",title:"昼休憩"},
+ {day:1,start:"14:50",end:"15:10",title:"休憩"},
+ {day:1,start:"16:30",end:"16:50",title:"休憩"},
+ {day:2,start:"10:50",end:"11:10",title:"休憩"},
+ {day:2,start:"12:30",end:"13:30",title:"昼休憩"},
+ {day:2,start:"14:50",end:"15:10",title:"休憩"},
+ {day:2,start:"16:30",end:"16:50",title:"休憩"}
+];
+var day=0,view="all",fav=new Set(load());
+function load(){try{return JSON.parse(localStorage.getItem("seminar-fav-1121")||"[]")}catch(e){return[]}}
+function save(){try{localStorage.setItem("seminar-fav-1121",JSON.stringify(Array.from(fav)))}catch(e){}}
+function mins(t){var p=t.split(":");return +p[0]*60+ +p[1]}
+function overlap(a,b){return mins(a.start)<mins(b.end)&&mins(b.start)<mins(a.end)}
+function favBtn(s){var on=fav.has(s.id);return '<button class="fav" data-id="'+s.id+'" aria-pressed="'+on+'">'+(on?'★ お気に入り済み':'☆ お気に入りに追加')+'</button>'}
+function card(s,extra){
+  return '<div class="card" style="--rc:'+ROOMS[s.room]+'"><div class="body"><h3>'+s.title+'</h3><div class="meta"><span class="room">'+s.room+'</span>'+(s.online?'<span class="onl">オンライン中継あり</span>':'')+(extra&&extra.time?'<br>'+s.start+' – '+s.end:'')+s.who.map(function(w){return '<br>'+w}).join("")+'</div></div>'+favBtn(s)+'</div>';
+}
+function renderDays(){
+  document.getElementById("days").innerHTML=DAYS.map(function(d,i){
+    var n=S.filter(function(s){return s.day===i&&fav.has(s.id)}).length;
+    return '<button class="day" data-day="'+i+'" aria-pressed="'+(i===day)+'"><b>'+d.s+'</b><span>'+d.w+'曜日'+(n?' ・ '+n+'講座':'')+'</span></button>';
+  }).join("");
+}
+function renderAll(){
+  var list=S.filter(function(s){return s.day===day});
+  var slots={};list.forEach(function(s){var k=s.start+"–"+s.end;(slots[k]=slots[k]||[]).push(s)});
+  return Object.keys(slots).sort().map(function(k){
+    return '<section class="slot"><h2>'+k.replace("–"," – ")+'</h2>'+slots[k].map(function(s){return card(s)}).join("")+'</section>';
+  }).join("");
+}
+function renderMy(){
+  var mine=S.filter(function(s){return s.day===day&&fav.has(s.id)});
+  if(!mine.length){
+    return '<div class="empty">この日のお気に入りはまだありません。<br>講座一覧で「☆ お気に入りに追加」を押すと、ここに時間割が表示されます。<br><button data-go="all">講座一覧を見る</button></div>';
+  }
+  var sorted=mine.slice().sort(function(a,b){return mins(a.start)-mins(b.start)});
+  var groups=[];
+  sorted.forEach(function(s){var g=groups[groups.length-1];if(g&&mins(s.start)<mins(g.end)){g.g.push(s);if(mins(s.end)>mins(g.end))g.end=s.end}else groups.push({t:"g",g:[s],start:s.start,end:s.end})});
+  var total=groups.reduce(function(a,g){return a+mins(g.end)-mins(g.start)},0);
+  var h=Math.floor(total/60),m=total%60;
+  var out='<div class="summary"><b>'+mine.length+'</b> 講座 ・ 合計 '+(h?h+'時間':'')+(m?m+'分':'')+'</div>';
+  var items=groups.concat(BR.filter(function(b){return b.day===day&&mins(b.start)>=mins(groups[0].end)&&mins(b.end)<=mins(groups[groups.length-1].start)}).map(function(b){return {t:"b",b:b}}));
+  items.sort(function(a,b){return mins((a.b||a).start)-mins((b.b||b).start)});
+  out+='<div class="tl">'+items.map(function(it){
+    if(it.t==="b"){var b=it.b;return '<div class="row"><div class="time">'+b.start+'<small>'+b.end+'</small></div><div class="rail brk"><i></i></div><div class="brk-card">'+b.title+'</div></div>'}
+    var g=it.g,s=g[0];var body=g.length>1?'<div class="par">'+g.map(function(x){return card(x,{time:true})}).join("")+'</div>':card(s);
+    return '<div class="row"><div class="time">'+it.start+'<small>'+it.end+'</small></div><div class="rail" style="--rc:'+ROOMS[s.room]+'"><i></i></div>'+body+'</div>';
+  }).join("")+'</div>';
+  return out;
+}
+function render(){
+  var d=DAYS[day];
+  document.getElementById("sub").textContent=d.d+"("+d.w+")"+(view==="all"?"の講座一覧":"のマイ時間割");
+  renderDays();
+  document.getElementById("view").innerHTML=view==="all"?renderAll():renderMy();
+  document.getElementById("cnt").textContent=fav.size;
+  document.getElementById("tab-all").setAttribute("aria-pressed",view==="all");
+  document.getElementById("tab-my").setAttribute("aria-pressed",view==="my");
+}
+document.addEventListener("click",function(e){
+  var f=e.target.closest("[data-id]");
+  if(f){var id=+f.dataset.id;fav.has(id)?fav.delete(id):fav.add(id);save();render();var nb=document.querySelector('.fav[data-id="'+id+'"]');if(nb)nb.focus({preventScroll:true});return}
+  var d=e.target.closest("[data-day]");
+  if(d){day=+d.dataset.day;render();window.scrollTo(0,0);return}
+  var g=e.target.closest("[data-go]");
+  if(g){view=g.dataset.go;render();window.scrollTo(0,0);return}
+});
+document.getElementById("tab-all").onclick=function(){view="all";render();window.scrollTo(0,0)};
+document.getElementById("tab-my").onclick=function(){view="my";render();window.scrollTo(0,0)};
+render();
+</script>
+</body>
+</html>
